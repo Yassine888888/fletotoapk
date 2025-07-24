@@ -1,6 +1,5 @@
 import flet as ft
 import requests
-from requests_ntlm import HttpNtlmAuth
 import json
 
 WHATSAPP_GREEN = "#25D366"
@@ -59,13 +58,17 @@ def chat_with_bc(page: ft.Page, go_home):
             input_box.value = ""
             page.update()
 
-            url = "http://197.13.22.3:7048/SMART/ODataV4/ODATA_TestOdata?company=IRPP2"
-            auth = HttpNtlmAuth("YMI", "b2m-IT@2024")
+            # Utilise ici l'URL de ton proxy local !
+            url = "http://192.168.1.14:10000/relai"
             headers = {"Content-Type": "application/json"}
             data = {"messageOData": msg}
             try:
-                r = requests.post(url, headers=headers, data=json.dumps(data), auth=auth, timeout=100)
-                api_response = r.json().get("value") if r.status_code == 200 else f"Erreur API {r.status_code}: {r.text}"
+                r = requests.post(url, headers=headers, json=data, timeout=100)
+                try:
+                    # Tente de décoder le JSON (si possible)
+                    api_response = r.json().get("value") if r.status_code == 200 else f"Erreur API {r.status_code}: {r.text}"
+                except Exception:
+                    api_response = r.text
             except Exception as ex:
                 api_response = f"Erreur de connexion: {ex}"
 
